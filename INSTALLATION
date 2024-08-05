@@ -1,0 +1,70 @@
+Step 1: Update the Package List
+sudo apt update
+
+Step 2: Install Java
+sudo apt install openjdk-11-jdk -y
+
+Verify the installation:
+java -version
+
+Step 3: Download and Extract Kafka
+cd /opt
+
+wget https://downloads.apache.org/kafka/3.8.0/kafka_2.12-3.8.0.tgz
+
+Extract the downloaded tarball:
+tar -xzf kafka_2.12-3.8.0.tgz
+
+Rename the extracted directory to something simpler, like kafka.
+mv kafka_2.13-3.5.0 kafka
+
+Step 4: Start Zookeeper
+cd /opt/kafka/bin
+nohup ./zookeeper-server-start.sh ../config/zookeeper.properties > zookeeper.log 2>&1 &
+
+Start Kafka Server
+cd /opt/kafka/bin
+nohup ./kafka-server-start.sh ../config/server.properties > kafka.log 2>&1 &
+
+Step 8: Configure Kafka & Zookeeper as a Systemd Service (Optional)
+
+sudo vi /etc/systemd/system/kafka.service
+
+[Unit]
+Description=Apache Kafka Server
+After=network.target
+
+[Service]
+User=your_username
+ExecStart=/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+ExecStop=/opt/kafka/bin/kafka-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+
+sudo vi /etc/systemd/system/zookeeper.service
+[Unit]
+Description=Apache Zookeeper Server
+After=network.target
+
+[Service]
+User=your_username
+ExecStart=/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+ExecStop=/opt/kafka/bin/zookeeper-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+
+
+Reload the systemd daemon:
+sudo systemctl daemon-reload
+
+sudo systemctl status zookeeper
+sudo systemctl status kafka
+
+
+
+
+
